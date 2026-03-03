@@ -7,24 +7,21 @@ const CONFIG = {
 
   // Chave API do Google Cloud — instruções: ver SETUP_GOOGLE_DRIVE.md
   // Activar no Google Cloud: "Google Calendar API" + "Google Drive API"
-  apiKey: 'CHAVE_API_AQUI',
+  apiKey: 'AIzaSyDsl4siyep6WzpdOBC1blkPPy7LwxTQUUE',
 
   // Google Calendar — eventos carregados automaticamente
   // ID do calendário: Google Calendar → ⚙️ Definições → nome do calendário
   //   → "Integrar calendário" → "ID do calendário"
   // O calendário tem de estar partilhado como público (visível para todos)
   calendar: {
-    id: 'ID_CALENDARIO_AQUI',  // ex: "abc123xyz@group.calendar.google.com"
+    id: 'crb.clubemodelismobenfica@gmail.com',
     maxEvents: 9,
   },
 
   // Google Drive — documentos por ano (instruções: ver SETUP_GOOGLE_DRIVE.md)
   drive: {
     folderIds: {
-      '2025': 'ID_PASTA_2025',
-      '2024': 'ID_PASTA_2024',
-      '2023': 'ID_PASTA_2023',
-      '2022': 'ID_PASTA_2022',
+      '2025': '13RL-CrlcIfI0CViOmnmhuwCT3tatbf4M',
     },
   },
 };
