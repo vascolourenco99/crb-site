@@ -728,6 +728,7 @@ footer {
   #contacto { padding: 4rem 1.5rem; grid-template-columns: 1fr; gap: 3rem; }
   .hero-content { padding: 3rem 1.5rem 2rem; }
   .pista-text { padding: 4rem 1.5rem; }
+  .btn-maps { display: block; text-align: center; }
   #pista { grid-template-columns: 1fr; }
   #pista .pista-visual { padding: 0; }
   #contacto .pista-visual { margin: 0 -1.5rem -4rem; }
