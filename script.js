@@ -2,8 +2,9 @@
 //  CONFIG — editar aqui para configurar o site
 // ─────────────────────────────────────────────────────────────────────────────
 const CONFIG = {
-  // Senha de acesso à área de documentos (em produção proteger com .htaccess)
-  password: 'crb2025',
+  // Hash SHA-256 da senha — para gerar o hash, abre o browser console e corre:
+  // Substitui o valor abaixo pelo resultado
+  passwordHash: '6905f62f40f91b364704eed0945222bab6ee4ce0f01445712a0b61a56f76bb5f',
 
   // Chave API do Google Cloud — instruções: ver SETUP_GOOGLE_DRIVE.md
   // Activar no Google Cloud: "Google Calendar API" + "Google Drive API"
@@ -15,13 +16,13 @@ const CONFIG = {
   // O calendário tem de estar partilhado como público (visível para todos)
   calendar: {
     id: 'crb.clubemodelismobenfica@gmail.com',
-    maxEvents: 9,
+    maxEvents: 4,
   },
 
   // Google Drive — documentos por ano (instruções: ver SETUP_GOOGLE_DRIVE.md)
   drive: {
     folderIds: {
-      '2025': '13RL-CrlcIfI0CViOmnmhuwCT3tatbf4M',
+      '2026': '13RL-CrlcIfI0CViOmnmhuwCT3tatbf4M',
     },
   },
 };
@@ -130,16 +131,34 @@ function calEventToCard(item) {
 /** Renderiza os cards de eventos no grid */
 function renderEventCards(events) {
   const grid = document.getElementById('eventos-grid');
-  grid.innerHTML = events.map(ev => {
+
+  // Remove toggle button from a previous render if present
+  document.querySelector('.eventos-toggle')?.remove();
+
+  grid.innerHTML = events.map((ev, i) => {
     const isComp = ev.tag === 'Competição';
+    const extraClass = i >= 3 ? ' card-extra' : '';
     return `
-      <div class="evento-card">
+      <div class="evento-card${extraClass}">
         <div class="evento-date">${ev.date}</div>
         <div class="evento-title">${ev.title}</div>
         <div class="evento-local">📍 ${ev.local}</div>
         <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
       </div>`;
   }).join('');
+
+  if (events.length > 3) {
+    const btn = document.createElement('button');
+    btn.className = 'eventos-toggle';
+    btn.textContent = S.show_more;
+    let expanded = false;
+    btn.addEventListener('click', () => {
+      expanded = !expanded;
+      grid.classList.toggle('expanded', expanded);
+      btn.textContent = expanded ? S.show_less : S.show_more;
+    });
+    grid.insertAdjacentElement('afterend', btn);
+  }
 }
 
 /** Carrega eventos do Google Calendar; usa EVENTOS hardcoded como fallback */
@@ -250,6 +269,12 @@ async function renderDocs(year) {
   }
 }
 
+/** Devolve o hash SHA-256 de uma string (hex) */
+async function hashPwd(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
 /** Inicializa a secção de documentos: password gate + tabs por ano */
 function setupDocumentos() {
   const lockEl = document.getElementById('docs-locked');
@@ -257,11 +282,12 @@ function setupDocumentos() {
   const inputEl = document.getElementById('docs-password');
   const errorEl = document.getElementById('pw-error');
 
-  function unlock() {
-    if (inputEl.value === CONFIG.password) {
+  async function unlock() {
+    const hash = await hashPwd(inputEl.value);
+    if (hash === CONFIG.passwordHash) {
       lockEl.style.display = 'none';
       contentEl.style.display = 'block';
-      renderDocs('2025');
+      renderDocs('2026');
     } else {
       errorEl.style.display = 'block';
       inputEl.value = '';
@@ -287,5 +313,4 @@ function setupDocumentos() {
 document.addEventListener('DOMContentLoaded', () => {
   renderEventos();
   setupDocumentos();
-  setupContacto();
 });
