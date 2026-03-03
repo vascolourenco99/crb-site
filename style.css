@@ -92,6 +92,25 @@ nav {
 }
 .nav-cta:hover { background: var(--cyan); color: var(--black); }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--grey-light);
+  text-decoration: none;
+  padding-bottom: 1px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-lang:hover { color: var(--cyan); border-bottom-color: var(--cyan); }
+
 /* ── HERO ── */
 .hero {
   min-height: 100vh;

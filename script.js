@@ -39,6 +39,39 @@ const EVENTOS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  IDIOMA — detectado a partir do atributo lang do <html>
+// ─────────────────────────────────────────────────────────────────────────────
+const LANG = document.documentElement.lang === 'en' ? 'en' : 'pt';
+const LOCALE = LANG === 'en' ? 'en-GB' : 'pt-PT';
+const S = LANG === 'en' ? {
+  loading_events: 'Loading events…',
+  no_events:      'No upcoming events.',
+  error_events:   'Error loading events: ',
+  loading_docs:   'Loading documents…',
+  no_docs:        'No documents available for ',
+  drive_not_cfg:  'Google Drive not configured for ',
+  drive_hint:     'See <em>SETUP_GOOGLE_DRIVE.md</em>.',
+  error_docs:     'Error loading: ',
+  event_default:  'Event',
+  download:       'Download',
+  view:           'View',
+  file:           'File',
+} : {
+  loading_events: 'A carregar eventos…',
+  no_events:      'Sem eventos próximos.',
+  error_events:   'Erro ao carregar eventos: ',
+  loading_docs:   'A carregar documentos…',
+  no_docs:        'Sem documentos disponíveis para ',
+  drive_not_cfg:  'Google Drive não configurado para ',
+  drive_hint:     'Ver <em>SETUP_GOOGLE_DRIVE.md</em>.',
+  error_docs:     'Erro ao carregar: ',
+  event_default:  'Evento',
+  download:       'Descarregar',
+  view:           'Ver',
+  file:           'Ficheiro',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  MÓDULO: EVENTOS — Google Calendar
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -79,18 +112,18 @@ async function fetchCalendarEvents() {
  */
 function calEventToCard(item) {
   const start = new Date(item.start.dateTime || item.start.date);
-  const weekday = start.toLocaleDateString('pt-PT', { weekday: 'short' })
+  const weekday = start.toLocaleDateString(LOCALE, { weekday: 'short' })
     .toUpperCase().replace(/\.$/, '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const day = start.getDate().toString().padStart(2, '0');
-  const month = start.toLocaleDateString('pt-PT', { month: 'short' })
+  const month = start.toLocaleDateString(LOCALE, { month: 'short' })
     .toUpperCase().replace(/\.$/, '');
   const year = start.getFullYear();
   return {
     date: `${weekday} ${day} ${month} ${year}`,
-    title: item.summary || 'Evento',
+    title: item.summary || S.event_default,
     local: item.location || '',
-    tag: (item.description || 'Evento').trim().split('\n')[0].trim(),
+    tag: (item.description || S.event_default).trim().split('\n')[0].trim(),
   };
 }
 
@@ -118,18 +151,18 @@ async function renderEventos() {
     return;
   }
 
-  grid.innerHTML = '<div class="eventos-loading">A carregar eventos…</div>';
+  grid.innerHTML = `<div class="eventos-loading">${S.loading_events}</div>`;
 
   try {
     const items = await fetchCalendarEvents();
     const events = items.map(calEventToCard);
     if (events.length === 0) {
-      grid.innerHTML = '<div class="eventos-loading">Sem eventos próximos.</div>';
+      grid.innerHTML = `<div class="eventos-loading">${S.no_events}</div>`;
       return;
     }
     renderEventCards(events);
   } catch (err) {
-    grid.innerHTML = `<div class="eventos-error">Erro ao carregar eventos: ${err.message}</div>`;
+    grid.innerHTML = `<div class="eventos-error">${S.error_events}${err.message}</div>`;
   }
 }
 
@@ -167,12 +200,12 @@ async function fetchDriveFiles(year) {
 /** Converte um ficheiro do Drive no formato que o renderizador espera */
 function driveFileToItem(file) {
   const TYPES = {
-    'application/pdf': { label: 'PDF', btn: 'Descarregar', url: `https://drive.google.com/uc?export=download&id=${file.id}` },
-    'application/vnd.google-apps.document': { label: 'Google Doc', btn: 'Ver', url: `https://docs.google.com/document/d/${file.id}/export?format=pdf` },
-    'application/vnd.google-apps.spreadsheet': { label: 'Google Sheets', btn: 'Ver', url: `https://docs.google.com/spreadsheets/d/${file.id}/export?format=pdf` },
+    'application/pdf': { label: 'PDF', btn: S.download, url: `https://drive.google.com/uc?export=download&id=${file.id}` },
+    'application/vnd.google-apps.document': { label: 'Google Doc', btn: S.view, url: `https://docs.google.com/document/d/${file.id}/export?format=pdf` },
+    'application/vnd.google-apps.spreadsheet': { label: 'Google Sheets', btn: S.view, url: `https://docs.google.com/spreadsheets/d/${file.id}/export?format=pdf` },
   };
-  const { label, btn, url } = TYPES[file.mimeType] ?? { label: 'Ficheiro', btn: 'Ver', url: file.webViewLink };
-  const date = new Date(file.createdTime).toLocaleDateString('pt-PT', {
+  const { label, btn, url } = TYPES[file.mimeType] ?? { label: S.file, btn: S.view, url: file.webViewLink };
+  const date = new Date(file.createdTime).toLocaleDateString(LOCALE, {
     day: '2-digit', month: 'short', year: 'numeric',
   });
   return { name: file.name, date, url, label, btn };
@@ -183,17 +216,17 @@ async function renderDocs(year) {
   const list = document.getElementById('docs-list');
 
   if (!driveReady(year)) {
-    list.innerHTML = `<div class="docs-empty">Google Drive não configurado para ${year}.<br>Ver <em>SETUP_GOOGLE_DRIVE.md</em>.</div>`;
+    list.innerHTML = `<div class="docs-empty">${S.drive_not_cfg}${year}.<br>${S.drive_hint}</div>`;
     return;
   }
 
-  list.innerHTML = '<div class="docs-loading">A carregar documentos…</div>';
+  list.innerHTML = `<div class="docs-loading">${S.loading_docs}</div>`;
 
   try {
     const files = await fetchDriveFiles(year);
 
     if (files.length === 0) {
-      list.innerHTML = `<div class="docs-empty">Sem documentos disponíveis para ${year}.</div>`;
+      list.innerHTML = `<div class="docs-empty">${S.no_docs}${year}.</div>`;
       return;
     }
 
@@ -213,7 +246,7 @@ async function renderDocs(year) {
     }).join('');
 
   } catch (err) {
-    list.innerHTML = `<div class="docs-error">Erro ao carregar: ${err.message}</div>`;
+    list.innerHTML = `<div class="docs-error">${S.error_docs}${err.message}</div>`;
   }
 }
 
