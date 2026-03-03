@@ -729,7 +729,10 @@ footer {
   .hero-content { padding: 3rem 1.5rem 2rem; }
   .pista-text { padding: 4rem 1.5rem; }
   #pista { grid-template-columns: 1fr; }
+  #pista .pista-visual { padding: 0; }
+  #contacto .pista-visual { margin: 0 -1.5rem -4rem; }
   .pista-visual { min-height: 260px; }
+  .pista-panoramica { height: 260px; object-fit: cover; }
   .docs-layout { grid-template-columns: 1fr; }
   .docs-years { display: flex; overflow-x: auto; padding: 0; }
   .doc-year-btn { border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
