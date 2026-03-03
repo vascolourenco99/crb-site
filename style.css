@@ -124,11 +124,9 @@ nav {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 55% 70% at 70% 45%, rgba(0,200,232,0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 35% 45% at 15% 75%, rgba(255,45,107,0.06) 0%, transparent 60%),
-    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(0,0,0,0.04) 59px, rgba(0,0,0,0.04) 60px),
-    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(0,0,0,0.04) 59px, rgba(0,0,0,0.04) 60px);
+  /* offset y=8px → linha horizontal cai em 68px (= altura da navbar)  */
+  /* offset x=20px → linha vertical cai em 80px (= padding-left dos eventos) */
+  background-position: 0 0, 0 0, 0 8px, 20px 0;
 }
 
 .hero-watermark {
@@ -366,17 +364,24 @@ button.btn-primary { width: fit-content; }
 /* ── PISTA ── */
 #pista { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
 
-.pista-text { padding: 6rem 5rem; background: var(--black); }
+.pista-text {
+  padding: 4rem 5rem;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .pista-desc { color: var(--grey-light); font-size: 0.93rem; line-height: 1.75; margin-bottom: 2rem; }
 
 .pista-visual {
-  background: var(--grey-dark);
-  position: relative;
-  min-height: 520px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+#pista .pista-visual {
+  padding: 6rem 0 6rem 5rem;
 }
 
 
@@ -388,6 +393,12 @@ button.btn-primary { width: fit-content; }
   mix-blend-mode: multiply;
   opacity: 0.88;
   transition: opacity 0.3s;
+}
+
+.pista-panoramica {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .info-list { list-style: none; display: flex; flex-direction: column; }
