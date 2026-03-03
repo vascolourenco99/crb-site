@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Static single-page website for **Clube de Radiomodelismo de Benfica (CRB)** — a Portuguese radio-controlled modelling club. No build system, no dependencies, no framework — just vanilla HTML/CSS/JS.
+Static single-page website for **Clube de Radiomodelismo de Benfica (CRB)** — a Portuguese radio-controlled modelling club. No build system, no dependencies, no framework — just vanilla HTML/CSS/JS split across three files.
+
+## File structure
+
+```
+index.html   — HTML structure only, no inline styles or scripts
+style.css    — all styles
+script.js    — all JavaScript (CONFIG, data, modules)
+```
 
 ## Development
 
@@ -22,7 +30,7 @@ There are no lint tools or tests configured.
 
 ## Architecture
 
-Everything lives in a single file: `index.html` (~30 KB).
+Three files, each with a single concern.
 
 ### Sections (in order)
 
@@ -70,5 +78,6 @@ Supports PDFs (download link) and Google Docs/Sheets (PDF export link), sorted b
 
 ## Content Updates
 
-- Add/modify events: edit the `EVENTOS` array in `index.html`
-- Club contact info, track hours, and other static text is inline HTML — search for the relevant string to locate it
+- Add/modify events: edit the `EVENTOS` array in `script.js`
+- Google integrations config: edit the `CONFIG` object at the top of `script.js`
+- Club contact info, track hours, and other static text is in `index.html` — search for the relevant string to locate it
