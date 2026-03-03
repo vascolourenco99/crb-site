@@ -48,9 +48,27 @@ CSS custom properties defined in `:root`:
 
 Single responsive breakpoint at `max-width: 900px`.
 
+## Google integrations
+
+Both integrations share a single `CONFIG.apiKey` (one Google Cloud project, enable both Calendar API and Drive API).
+
+### Google Calendar (events section)
+
+Fetches upcoming events via Calendar API v3. Config in `CONFIG.calendar`:
+- `id` — public calendar ID (Calendar settings → "Integrate calendar" → "Calendar ID")
+- `maxEvents` — how many upcoming events to show (default 9)
+
+The calendar must be shared publicly. The event **Description** field is used as the tag (`Treino`, `Competição`, `Workshop`, etc.) — if empty, defaults to `Evento`.
+
+Falls back to the hardcoded `EVENTOS` array if Calendar is not configured.
+
+### Google Drive (documents section)
+
+Fetches files from per-year folders via Drive API v3. Config in `CONFIG.drive.folderIds` — one folder ID per year. Folders must be shared as "Anyone with the link → Viewer". Setup steps: see `SETUP_GOOGLE_DRIVE.md`.
+
+Supports PDFs (download link) and Google Docs/Sheets (PDF export link), sorted by upload date newest first.
+
 ## Content Updates
 
-All content is hardcoded in `index.html`:
-- Add/modify events by editing the `EVENTOS` array
-- Add/modify documents by editing the `DOCS` object
+- Add/modify events: edit the `EVENTOS` array in `index.html`
 - Club contact info, track hours, and other static text is inline HTML — search for the relevant string to locate it

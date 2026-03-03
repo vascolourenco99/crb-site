@@ -618,6 +618,67 @@
   }
   .footer-links a:hover { color: var(--cyan); }
 
+  .docs-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--grey-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    gap: 0.75rem;
+  }
+  .docs-loading::before {
+    content: '';
+    width: 14px; height: 14px;
+    border: 1.5px solid rgba(0,200,232,0.25);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .docs-empty {
+    padding: 2.5rem 1.5rem;
+    color: var(--grey-light);
+    font-size: 0.84rem;
+    text-align: center;
+    line-height: 1.65;
+  }
+  .docs-error {
+    padding: 2.5rem 1.5rem;
+    color: var(--pink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    text-align: center;
+    line-height: 1.65;
+  }
+
+  .eventos-loading, .eventos-error {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem;
+    background: var(--grey-dark);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+  }
+  .eventos-loading { color: var(--grey-light); gap: 0.75rem; }
+  .eventos-loading::before {
+    content: '';
+    width: 14px; height: 14px;
+    border: 1.5px solid rgba(0,200,232,0.25);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  .eventos-error { color: var(--pink); }
+
   /* ── ANIMATIONS ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(22px); }
@@ -775,7 +836,7 @@
     <p class="lock-desc">Introduz a senha enviada pela direção para aceder às atas e documentos do clube.</p>
     <div class="lock-form">
       <input type="password" class="lock-input" id="docs-password" placeholder="Senha…" />
-      <button class="lock-submit" onclick="checkPassword()">Entrar</button>
+      <button class="lock-submit" id="docs-submit">Entrar</button>
     </div>
     <p id="pw-error" style="display:none;font-size:0.75rem;color:var(--pink);font-family:'IBM Plex Mono',monospace;">Senha incorreta.</p>
   </div>
@@ -783,10 +844,10 @@
   <div id="docs-content" style="display:none;">
     <div class="docs-layout">
       <div class="docs-years">
-        <button class="doc-year-btn active" onclick="showYear('2025', this)">2025</button>
-        <button class="doc-year-btn" onclick="showYear('2024', this)">2024</button>
-        <button class="doc-year-btn" onclick="showYear('2023', this)">2023</button>
-        <button class="doc-year-btn" onclick="showYear('2022', this)">2022</button>
+        <button class="doc-year-btn active" data-year="2025">2025</button>
+        <button class="doc-year-btn" data-year="2024">2024</button>
+        <button class="doc-year-btn" data-year="2023">2023</button>
+        <button class="doc-year-btn" data-year="2022">2022</button>
       </div>
       <div class="docs-list" id="docs-list"></div>
     </div>
@@ -798,7 +859,7 @@
   <div>
     <div class="section-eyebrow">Fala Connosco</div>
     <h2 class="section-title">Contacto</h2>
-    <form class="contact-form" onsubmit="handleForm(event)">
+    <form class="contact-form" id="contact-form">
       <div class="form-group">
         <label class="form-label">Nome</label>
         <input type="text" class="form-input" placeholder="O teu nome" required />
@@ -863,98 +924,277 @@
 </footer>
 
 <script>
-  const EVENTOS = [
-    { date: "SAB 15 MAR 2025", title: "Treino Aberto — Monsanto", local: "Pista de Monsanto, Lisboa", tag: "Treino" },
-    { date: "DOM 23 MAR 2025", title: "Campeonato Regional 1/10 Elétrico", local: "Pista de Monsanto, Lisboa", tag: "Competição" },
-    { date: "SAB 05 ABR 2025", title: "Workshop de Manutenção", local: "Sede do Clube", tag: "Workshop" },
-    { date: "DOM 27 ABR 2025", title: "Prova Nacional — Etapa 1", local: "Circuito TBA", tag: "Competição" },
-    { date: "SAB 10 MAI 2025", title: "Dia Aberto para Novos Sócios", local: "Pista de Monsanto, Lisboa", tag: "Evento" },
-    { date: "DOM 18 MAI 2025", title: "Campeonato CRB — Ronda 2", local: "Pista de Monsanto, Lisboa", tag: "Competição" },
-  ];
+  // ─────────────────────────────────────────────────────────────────────────
+  //  CONFIG — editar aqui para configurar o site
+  // ─────────────────────────────────────────────────────────────────────────
+  const CONFIG = {
+    // Senha de acesso à área de documentos (em produção proteger com .htaccess)
+    password: 'crb2025',
 
-  const DOCS = {
-    "2025": [
-      { name: "Ata Assembleia Geral — Março 2025", date: "12 Mar 2025", url: "#" },
-      { name: "Relatório de Contas Q1 2025", date: "31 Mar 2025", url: "#" },
-      { name: "Regulamento Interno 2025", date: "01 Jan 2025", url: "#" },
-    ],
-    "2024": [
-      { name: "Ata Assembleia Geral — Dezembro 2024", date: "15 Dez 2024", url: "#" },
-      { name: "Relatório de Contas Anual 2024", date: "20 Dez 2024", url: "#" },
-      { name: "Ata Assembleia Geral — Junho 2024", date: "10 Jun 2024", url: "#" },
-    ],
-    "2023": [
-      { name: "Ata Assembleia Geral — Dezembro 2023", date: "18 Dez 2023", url: "#" },
-      { name: "Relatório de Contas Anual 2023", date: "22 Dez 2023", url: "#" },
-    ],
-    "2022": [
-      { name: "Ata Assembleia Geral — Dezembro 2022", date: "12 Dez 2022", url: "#" },
-    ],
+    // Chave API do Google Cloud — instruções: ver SETUP_GOOGLE_DRIVE.md
+    // Activar no Google Cloud: "Google Calendar API" + "Google Drive API"
+    apiKey: 'CHAVE_API_AQUI',
+
+    // Google Calendar — eventos carregados automaticamente
+    // ID do calendário: Google Calendar → ⚙️ Definições → nome do calendário
+    //   → "Integrar calendário" → "ID do calendário"
+    // O calendário tem de estar partilhado como público (visível para todos)
+    calendar: {
+      id:        'ID_CALENDARIO_AQUI',  // ex: "abc123xyz@group.calendar.google.com"
+      maxEvents: 9,
+    },
+
+    // Google Drive — documentos por ano (instruções: ver SETUP_GOOGLE_DRIVE.md)
+    drive: {
+      folderIds: {
+        '2025': 'ID_PASTA_2025',
+        '2024': 'ID_PASTA_2024',
+        '2023': 'ID_PASTA_2023',
+        '2022': 'ID_PASTA_2022',
+      },
+    },
   };
 
-  // senha demo — em produção proteger com .htaccess
-  const CORRECT_PASSWORD = "crb2025";
+  // ─────────────────────────────────────────────────────────────────────────
+  //  DADOS — editar aqui para actualizar eventos
+  // ─────────────────────────────────────────────────────────────────────────
+  const EVENTOS = [
+    { date: "SAB 15 MAR 2025", title: "Treino Aberto — Monsanto",          local: "Pista de Monsanto, Lisboa", tag: "Treino"     },
+    { date: "DOM 23 MAR 2025", title: "Campeonato Regional 1/10 Elétrico", local: "Pista de Monsanto, Lisboa", tag: "Competição" },
+    { date: "SAB 05 ABR 2025", title: "Workshop de Manutenção",            local: "Sede do Clube",             tag: "Workshop"   },
+    { date: "DOM 27 ABR 2025", title: "Prova Nacional — Etapa 1",          local: "Circuito TBA",              tag: "Competição" },
+    { date: "SAB 10 MAI 2025", title: "Dia Aberto para Novos Sócios",      local: "Pista de Monsanto, Lisboa", tag: "Evento"     },
+    { date: "DOM 18 MAI 2025", title: "Campeonato CRB — Ronda 2",          local: "Pista de Monsanto, Lisboa", tag: "Competição" },
+  ];
 
-  // Render eventos
-  const grid = document.getElementById('eventos-grid');
-  EVENTOS.forEach(ev => {
-    const isComp = ev.tag === 'Competição';
-    grid.innerHTML += `
-      <div class="evento-card">
-        <div class="evento-date">${ev.date}</div>
-        <div class="evento-title">${ev.title}</div>
-        <div class="evento-local">📍 ${ev.local}</div>
-        <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
-      </div>`;
-  });
+  // ─────────────────────────────────────────────────────────────────────────
+  //  MÓDULO: EVENTOS — Google Calendar
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // Render docs
-  function renderDocs(year) {
-    const list = document.getElementById('docs-list');
-    list.innerHTML = '';
-    (DOCS[year] || []).forEach(doc => {
-      list.innerHTML += `
-        <div class="doc-item">
-          <div class="doc-item-left">
-            <span class="doc-icon">📄</span>
-            <div>
-              <div class="doc-name">${doc.name}</div>
-              <div class="doc-meta">PDF · ${doc.date}</div>
-            </div>
-          </div>
-          <a href="${doc.url}" class="doc-download" download>Descarregar</a>
-        </div>`;
+  /** Verifica se o Calendar está configurado */
+  function calendarReady() {
+    const { id } = CONFIG.calendar;
+    return (
+      CONFIG.apiKey && CONFIG.apiKey !== 'CHAVE_API_AQUI' &&
+      id && id !== 'ID_CALENDARIO_AQUI'
+    );
+  }
+
+  /** Vai buscar os próximos eventos ao Google Calendar */
+  async function fetchCalendarEvents() {
+    const { id, maxEvents } = CONFIG.calendar;
+    const params = new URLSearchParams({
+      key:          CONFIG.apiKey,
+      timeMin:      new Date().toISOString(),
+      maxResults:   maxEvents,
+      singleEvents: 'true',
+      orderBy:      'startTime',
+      fields:       'items(summary,location,start,description)',
     });
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?${params}`
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.error?.message || `HTTP ${res.status}`);
+    }
+    return (await res.json()).items ?? [];
   }
 
-  function showYear(year, btn) {
-    document.querySelectorAll('.doc-year-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderDocs(year);
+  /**
+   * Converte um evento do Google Calendar para o formato dos cards.
+   * Convenção: o campo "Descrição" do evento = tag (ex: "Treino", "Competição").
+   * Se estiver vazio, usa "Evento".
+   */
+  function calEventToCard(item) {
+    const start   = new Date(item.start.dateTime || item.start.date);
+    const weekday = start.toLocaleDateString('pt-PT', { weekday: 'short' })
+                        .toUpperCase().replace(/\.$/, '')
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const day     = start.getDate().toString().padStart(2, '0');
+    const month   = start.toLocaleDateString('pt-PT', { month: 'short' })
+                        .toUpperCase().replace(/\.$/, '');
+    const year    = start.getFullYear();
+    return {
+      date:  `${weekday} ${day} ${month} ${year}`,
+      title: item.summary  || 'Evento',
+      local: item.location || '',
+      tag:   (item.description || 'Evento').trim().split('\n')[0].trim(),
+    };
   }
 
-  function checkPassword() {
-    const val = document.getElementById('docs-password').value;
-    const err = document.getElementById('pw-error');
-    if (val === CORRECT_PASSWORD) {
-      document.getElementById('docs-locked').style.display = 'none';
-      document.getElementById('docs-content').style.display = 'block';
-      renderDocs('2025');
-    } else {
-      err.style.display = 'block';
-      document.getElementById('docs-password').value = '';
+  /** Renderiza os cards de eventos no grid */
+  function renderEventCards(events) {
+    const grid = document.getElementById('eventos-grid');
+    grid.innerHTML = events.map(ev => {
+      const isComp = ev.tag === 'Competição';
+      return `
+        <div class="evento-card">
+          <div class="evento-date">${ev.date}</div>
+          <div class="evento-title">${ev.title}</div>
+          <div class="evento-local">📍 ${ev.local}</div>
+          <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
+        </div>`;
+    }).join('');
+  }
+
+  /** Carrega eventos do Google Calendar; usa EVENTOS hardcoded como fallback */
+  async function renderEventos() {
+    const grid = document.getElementById('eventos-grid');
+
+    if (!calendarReady()) {
+      renderEventCards(EVENTOS);
+      return;
+    }
+
+    grid.innerHTML = '<div class="eventos-loading">A carregar eventos…</div>';
+
+    try {
+      const items  = await fetchCalendarEvents();
+      const events = items.map(calEventToCard);
+      if (events.length === 0) {
+        grid.innerHTML = '<div class="eventos-loading">Sem eventos próximos.</div>';
+        return;
+      }
+      renderEventCards(events);
+    } catch (err) {
+      grid.innerHTML = `<div class="eventos-error">Erro ao carregar eventos: ${err.message}</div>`;
     }
   }
 
-  document.getElementById('docs-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkPassword();
-  });
+  // ─────────────────────────────────────────────────────────────────────────
+  //  MÓDULO: DOCUMENTOS — Google Drive
+  // ─────────────────────────────────────────────────────────────────────────
 
-  function handleForm(e) {
-    e.preventDefault();
-    document.getElementById('form-success').style.display = 'block';
-    e.target.reset();
+  /** Verifica se o Drive está configurado para o ano pedido */
+  function driveReady(year) {
+    const { folderIds } = CONFIG.drive;
+    return (
+      CONFIG.apiKey && CONFIG.apiKey !== 'CHAVE_API_AQUI' &&
+      folderIds[year] && !folderIds[year].startsWith('ID_PASTA')
+    );
   }
+
+  /** Vai buscar os ficheiros da pasta do Drive para o ano indicado */
+  async function fetchDriveFiles(year) {
+    const { folderIds } = CONFIG.drive;
+    const params = new URLSearchParams({
+      q:        `'${folderIds[year]}' in parents and trashed = false`,
+      key:      CONFIG.apiKey,
+      fields:   'files(id,name,createdTime,webViewLink,mimeType)',
+      orderBy:  'createdTime desc',
+      pageSize: '50',
+    });
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.error?.message || `HTTP ${res.status}`);
+    }
+    return (await res.json()).files ?? [];
+  }
+
+  /** Converte um ficheiro do Drive no formato que o renderizador espera */
+  function driveFileToItem(file) {
+    const TYPES = {
+      'application/pdf':                          { label: 'PDF',           btn: 'Descarregar', url: `https://drive.google.com/uc?export=download&id=${file.id}` },
+      'application/vnd.google-apps.document':    { label: 'Google Doc',    btn: 'Ver',         url: `https://docs.google.com/document/d/${file.id}/export?format=pdf` },
+      'application/vnd.google-apps.spreadsheet': { label: 'Google Sheets', btn: 'Ver',         url: `https://docs.google.com/spreadsheets/d/${file.id}/export?format=pdf` },
+    };
+    const { label, btn, url } = TYPES[file.mimeType] ?? { label: 'Ficheiro', btn: 'Ver', url: file.webViewLink };
+    const date = new Date(file.createdTime).toLocaleDateString('pt-PT', {
+      day: '2-digit', month: 'short', year: 'numeric',
+    });
+    return { name: file.name, date, url, label, btn };
+  }
+
+  /** Renderiza a lista de documentos para o ano indicado */
+  async function renderDocs(year) {
+    const list = document.getElementById('docs-list');
+
+    if (!driveReady(year)) {
+      list.innerHTML = `<div class="docs-empty">Google Drive não configurado para ${year}.<br>Ver <em>SETUP_GOOGLE_DRIVE.md</em>.</div>`;
+      return;
+    }
+
+    list.innerHTML = '<div class="docs-loading">A carregar documentos…</div>';
+
+    try {
+      const files = await fetchDriveFiles(year);
+
+      if (files.length === 0) {
+        list.innerHTML = `<div class="docs-empty">Sem documentos disponíveis para ${year}.</div>`;
+        return;
+      }
+
+      list.innerHTML = files.map(file => {
+        const doc = driveFileToItem(file);
+        return `
+          <div class="doc-item">
+            <div class="doc-item-left">
+              <span class="doc-icon">📄</span>
+              <div>
+                <div class="doc-name">${doc.name}</div>
+                <div class="doc-meta">${doc.label} · ${doc.date}</div>
+              </div>
+            </div>
+            <a href="${doc.url}" class="doc-download" target="_blank" rel="noopener">${doc.btn}</a>
+          </div>`;
+      }).join('');
+
+    } catch (err) {
+      list.innerHTML = `<div class="docs-error">Erro ao carregar: ${err.message}</div>`;
+    }
+  }
+
+  /** Inicializa a secção de documentos: password gate + tabs por ano */
+  function setupDocumentos() {
+    const lockEl    = document.getElementById('docs-locked');
+    const contentEl = document.getElementById('docs-content');
+    const inputEl   = document.getElementById('docs-password');
+    const errorEl   = document.getElementById('pw-error');
+
+    function unlock() {
+      if (inputEl.value === CONFIG.password) {
+        lockEl.style.display    = 'none';
+        contentEl.style.display = 'block';
+        renderDocs('2025');
+      } else {
+        errorEl.style.display = 'block';
+        inputEl.value = '';
+      }
+    }
+
+    document.getElementById('docs-submit').addEventListener('click', unlock);
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+
+    document.querySelectorAll('.doc-year-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.doc-year-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderDocs(btn.dataset.year);
+      });
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  MÓDULO: CONTACTO
+  // ─────────────────────────────────────────────────────────────────────────
+  function setupContacto() {
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      document.getElementById('form-success').style.display = 'block';
+      e.target.reset();
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  ARRANQUE — ponto de entrada único
+  // ─────────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    renderEventos();
+    setupDocumentos();
+    setupContacto();
+  });
 </script>
 </body>
 </html>
