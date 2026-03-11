@@ -320,12 +320,12 @@ button.btn-primary { width: fit-content; }
 
 .evento-card {
   background: var(--grey-dark);
-  padding: 2rem;
   transition: background 0.2s;
   cursor: pointer;
   position: relative;
   overflow: hidden;
 }
+.evento-card-content { padding: 2rem; }
 .evento-card::after {
   content: '';
   position: absolute;
@@ -336,6 +336,34 @@ button.btn-primary { width: fit-content; }
 }
 .evento-card:hover { background: var(--grey-mid); }
 .evento-card:hover::after { width: 100%; }
+
+/* Card com imagem de fundo do Google Calendar */
+.evento-card.has-image {
+  background-image: var(--card-bg);
+  background-size: cover;
+  background-position: center;
+  min-height: 220px;
+  display: flex;
+  align-items: flex-end;
+}
+.evento-card.has-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0.25) 100%);
+  transition: opacity 0.2s;
+}
+.evento-card.has-image:hover { background-image: var(--card-bg); }
+.evento-card.has-image .evento-card-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+.evento-card.has-image .evento-date { color: #a8f0fa; }
+.evento-card.has-image .evento-title { color: #fff; }
+.evento-card.has-image .evento-local { color: rgba(255,255,255,0.7); }
+.evento-card.has-image .evento-tag { border-color: rgba(255,255,255,0.4); color: #fff; }
+.evento-card.has-image .evento-tag.competicao { border-color: rgba(255,45,107,0.6); color: var(--pink); }
 
 .evento-date {
   font-family: 'IBM Plex Mono', monospace;
@@ -413,6 +441,274 @@ button.btn-primary { width: fit-content; }
 .info-icon { color: var(--cyan); font-size: 0.95rem; margin-top: 0.1rem; flex-shrink: 0; }
 .info-content strong { display: block; font-size: 0.84rem; font-weight: 600; margin-bottom: 0.2rem; }
 .info-content span { font-size: 0.84rem; color: var(--grey-light); }
+
+/* ── HISTÓRIA (secção na homepage) ── */
+#historia { padding: 6rem 5rem; background: var(--black); }
+
+.historia-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: end;
+  margin-bottom: 3.5rem;
+}
+
+.historia-lead {
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: var(--grey-light);
+}
+
+.historia-photos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  border: 1px solid var(--grey-line);
+}
+
+.hphoto {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.hphoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hphoto-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 0.55rem 0.85rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.52));
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+}
+
+.historia-cta { margin-top: 2.5rem; }
+
+/* ── PÁGINA HISTÓRIA ── */
+.hist-page-header {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  min-height: 65vh;
+  background: var(--grey-dark);
+}
+
+.hist-page-header-text {
+  padding: calc(68px + 4rem) 5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hist-page-header-img {
+  padding-top: 68px;
+  overflow: hidden;
+}
+
+.hist-page-header-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hist-section {
+  padding: 5rem;
+  background: var(--black);
+}
+
+.hist-section--alt { background: var(--grey-dark); }
+
+.hist-section-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: end;
+  margin-bottom: 3.5rem;
+}
+
+.hist-section-body {
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: var(--grey-light);
+}
+
+.hist-section-body p + p { margin-top: 1rem; }
+
+/* Photo grids — natural dimensions, no cropping */
+.hist-photo-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  border: 1px solid var(--grey-line);
+}
+
+.hist-photo-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  border: 1px solid var(--grey-line);
+  align-items: start;
+}
+
+.hist-photo-2x2 .hphoto,
+.hist-photo-row .hphoto {
+  height: auto;
+  aspect-ratio: unset;
+}
+
+.hist-photo-2x2 .hphoto img,
+.hist-photo-row .hphoto img {
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+}
+
+.hist-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.hist-comparison-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.hist-comparison-panel img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+.hist-comparison-label {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  background: rgba(0,0,0,0.45);
+  padding: 0.3rem 0.75rem;
+  backdrop-filter: blur(6px);
+}
+
+/* Pilots section */
+.hist-pilots {
+  padding: 5rem;
+  background: var(--grey-dark);
+}
+
+.hist-pilots-header { margin-bottom: 3rem; }
+
+.hist-pilots-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--grey-line);
+  border: 1px solid var(--grey-line);
+}
+
+.pilot-card {
+  background: var(--grey-dark);
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.pilot-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px; width: 0;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  transition: width 0.35s;
+}
+
+.pilot-card:hover { background: var(--grey-mid); }
+.pilot-card:hover::after { width: 100%; }
+
+.pilot-photo {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+  background: var(--grey-mid);
+}
+
+.pilot-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.pilot-flag {
+  font-size: 1.8rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.pilot-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.8rem, 4vw, 3.8rem);
+  line-height: 0.92;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.75rem;
+}
+
+.pilot-stats {
+  list-style: none;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pilot-stats li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pilot-stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--cyan);
+  line-height: 1;
+  min-width: 3rem;
+  text-shadow: 0 0 16px rgba(0,184,212,0.2);
+}
+
+.pilot-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-light);
+}
+
+.pilot-bio {
+  font-size: 0.86rem;
+  line-height: 1.72;
+  color: var(--grey-light);
+  border-top: 1px solid var(--grey-line);
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+}
 
 /* ── DOCUMENTOS ── */
 #documentos { padding: 6rem 5rem; background: var(--grey-dark); }
@@ -724,7 +1020,9 @@ footer {
 @media (max-width: 900px) {
   nav { padding: 0 1.25rem; }
   .nav-links, .nav-cta { display: none; }
-  #eventos, #documentos { padding: 4rem 1.5rem; }
+  #eventos, #documentos, #historia { padding: 4rem 1.5rem; }
+  .historia-header { grid-template-columns: 1fr; gap: 2rem; }
+  .historia-photos { grid-template-columns: repeat(2, 1fr); }
   #contacto { padding: 4rem 1.5rem; grid-template-columns: 1fr; gap: 3rem; }
   .hero-content { padding: 3rem 1.5rem 2rem; }
   .pista-text { padding: 4rem 1.5rem; }
@@ -740,6 +1038,18 @@ footer {
   .docs-years { display: flex; overflow-x: auto; padding: 0; }
   .doc-year-btn { border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
   .doc-year-btn.active { border-left: none; border-bottom-color: var(--cyan); }
+  .hist-page-header { grid-template-columns: 1fr; min-height: auto; }
+  .hist-page-header-text { padding: calc(68px + 2.5rem) 1.5rem 2.5rem; }
+  .hist-page-header-img { padding-top: 0; min-height: 260px; }
+  .hist-section { padding: 3rem 1.5rem; }
+  .hist-section-header { grid-template-columns: 1fr; gap: 1.5rem; }
+  .hist-photo-2x2 { grid-template-columns: 1fr; }
+  .hist-photo-row { grid-template-columns: 1fr; }
+  .hist-pilots { padding: 3rem 1.5rem; }
+  .hist-pilots-grid { grid-template-columns: 1fr; }
+  .pilot-card { padding: 2rem 1.5rem; }
+  .hist-comparison { grid-template-columns: 1fr; }
+  .hist-comparison-panel img { height: 260px; }
   footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem 1.5rem; }
   .hero-stats { flex-direction: column; }
   .stat { border-right: none; border-bottom: 1px solid var(--grey-line); }

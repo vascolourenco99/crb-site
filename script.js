@@ -94,7 +94,8 @@ async function fetchCalendarEvents() {
     maxResults: maxEvents,
     singleEvents: 'true',
     orderBy: 'startTime',
-    fields: 'items(summary,location,start,description)',
+    supportsAttachments: 'true',
+    fields: 'items(summary,location,start,description,attachments)',
   });
   const res = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?${params}`
@@ -120,11 +121,18 @@ function calEventToCard(item) {
   const month = start.toLocaleDateString(LOCALE, { month: 'short' })
     .toUpperCase().replace(/\.$/, '');
   const year = start.getFullYear();
+  // Imagem do evento: primeiro attachment do Google Calendar (se existir)
+  const attachment = item.attachments?.[0];
+  let image = null;
+  if (attachment?.fileId) {
+    image = `https://drive.google.com/thumbnail?id=${attachment.fileId}&sz=w800`;
+  }
   return {
     date: `${weekday} ${day} ${month} ${year}`,
     title: item.summary || S.event_default,
     local: item.location || '',
     tag: (item.description || S.event_default).trim().split('\n')[0].trim(),
+    image,
   };
 }
 
@@ -138,12 +146,16 @@ function renderEventCards(events) {
   grid.innerHTML = events.map((ev, i) => {
     const isComp = ev.tag === 'Competição';
     const extraClass = i >= 3 ? ' card-extra' : '';
+    const bgStyle = ev.image ? ` style="--card-bg: url('${ev.image}')"` : '';
+    const hasImg = ev.image ? ' has-image' : '';
     return `
-      <div class="evento-card${extraClass}">
-        <div class="evento-date">${ev.date}</div>
-        <div class="evento-title">${ev.title}</div>
-        <div class="evento-local">📍 ${ev.local}</div>
-        <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
+      <div class="evento-card${extraClass}${hasImg}"${bgStyle}>
+        <div class="evento-card-content">
+          <div class="evento-date">${ev.date}</div>
+          <div class="evento-title">${ev.title}</div>
+          ${ev.local ? `<div class="evento-local">📍 ${ev.local}</div>` : ''}
+          <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
+        </div>
       </div>`;
   }).join('');
 
@@ -311,6 +323,6 @@ function setupDocumentos() {
 //  ARRANQUE — ponto de entrada único
 // ─────────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  renderEventos();
-  setupDocumentos();
+  if (document.getElementById('eventos-grid')) renderEventos();
+  if (document.getElementById('docs-locked')) setupDocumentos();
 });
