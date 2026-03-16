@@ -131,8 +131,8 @@ function calEventToCard(item) {
   }
   // A descrição do Google Calendar vem em HTML — extrair href de <a> e texto limpo
   const rawDesc = item.description || '';
-  const linkMatch = rawDesc.match(/href="(https?:\/\/[^"]+)"/);
-  const linkLine = linkMatch ? linkMatch[1] : null;
+  const linkMatch = rawDesc.match(/href="(https?:\/\/[^"]+)"/) || rawDesc.match(/(https?:\/\/[^\s<"]+)/);
+  const linkLine = linkMatch ? linkMatch[1].replace(/&amp;/g, '&') : null;
   const plainDesc = rawDesc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const descLines = plainDesc.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
   const urlRe = /^https?:\/\//;
@@ -157,10 +157,10 @@ function renderEventCards(events) {
   grid.innerHTML = events.map((ev, i) => {
     const isComp = ev.tag === 'Competição';
     const extraClass = i >= 3 ? ' card-extra' : '';
-    const bgStyle = ev.image ? ` style="--card-bg: url('${ev.image}')"` : '';
     const hasImg = ev.image ? ' has-image' : '';
     return `
-      <div class="evento-card${extraClass}${hasImg}"${bgStyle}>
+      <div class="evento-card${extraClass}${hasImg}">
+        ${ev.image ? `<div class="evento-card-img"><img src="${ev.image}" alt="${ev.title}" loading="lazy"></div>` : ''}
         <div class="evento-card-content">
           <div class="evento-date">${ev.date}</div>
           <div class="evento-title">${ev.title}</div>
