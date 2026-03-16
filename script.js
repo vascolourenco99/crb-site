@@ -54,6 +54,7 @@ const S = LANG === 'en' ? {
   drive_hint:     'See <em>SETUP_GOOGLE_DRIVE.md</em>.',
   error_docs:     'Error loading: ',
   event_default:  'Event',
+  registration:   'Register',
   download:       'Download',
   view:           'View',
   file:           'File',
@@ -67,6 +68,7 @@ const S = LANG === 'en' ? {
   drive_hint:     'Ver <em>SETUP_GOOGLE_DRIVE.md</em>.',
   error_docs:     'Erro ao carregar: ',
   event_default:  'Evento',
+  registration:   'Inscrição',
   download:       'Descarregar',
   view:           'Ver',
   file:           'Ficheiro',
@@ -127,11 +129,20 @@ function calEventToCard(item) {
   if (attachment?.fileId) {
     image = `https://drive.google.com/thumbnail?id=${attachment.fileId}&sz=w800`;
   }
+  // A descrição do Google Calendar vem em HTML — extrair href de <a> e texto limpo
+  const rawDesc = item.description || '';
+  const linkMatch = rawDesc.match(/href="(https?:\/\/[^"]+)"/);
+  const linkLine = linkMatch ? linkMatch[1] : null;
+  const plainDesc = rawDesc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const descLines = plainDesc.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
+  const urlRe = /^https?:\/\//;
+  const tagLine = descLines.find(l => !urlRe.test(l));
   return {
     date: `${weekday} ${day} ${month} ${year}`,
     title: item.summary || S.event_default,
     local: item.location || '',
-    tag: (item.description || S.event_default).trim().split('\n')[0].trim(),
+    tag: tagLine || S.event_default,
+    link: linkLine || null,
     image,
   };
 }
@@ -154,7 +165,9 @@ function renderEventCards(events) {
           <div class="evento-date">${ev.date}</div>
           <div class="evento-title">${ev.title}</div>
           ${ev.local ? `<div class="evento-local">📍 ${ev.local}</div>` : ''}
-          <span class="evento-tag ${isComp ? 'competicao' : ''}">${ev.tag}</span>
+          <div class="evento-footer">
+            ${ev.link ? `<a class="evento-reg-btn" href="${ev.link}" target="_blank" rel="noopener">${S.registration}</a>` : ''}
+          </div>
         </div>
       </div>`;
   }).join('');
